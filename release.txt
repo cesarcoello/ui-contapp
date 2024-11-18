@@ -5,7 +5,7 @@ az login
 az acr login --name siscrdev
 
 docker tag sisui-dev:latest siscrdev.azurecr.io/sisui-dev:latest
-docker tag sisui-dev:latest siscrdev.azurecr.io/sisui-dev:0.0.5
+docker tag sisui-dev:latest siscrdev.azurecr.io/sisui-dev:0.0.6
 
 docker push siscrdev.azurecr.io/sisui-dev:latest
-docker push siscrdev.azurecr.io/sisui-dev:0.0.5
+docker push siscrdev.azurecr.io/sisui-dev:0.0.6
