@@ -11,23 +11,27 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLogin, setIsLogin] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setIsLogin(true)
 
     const passwordError = validatePassword(password)
     const emailError = validateEmail(email)
 
     if (passwordError || emailError) {
         setError(passwordError || emailError)
+        setIsLogin(false)
         return
     }
 
     try {
       const data = await loginUser({ email, password })
       localStorage.setItem('token', data.idToken)
+      setIsLogin(false)
       router.push('/')
     } catch (err) {
       setError(err.message || 'Error en el inicio de sesión')
@@ -62,8 +66,8 @@ export default function Login() {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-            Iniciar Sesión
+          <button disabled={isLogin} type="submit" className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            { isLogin ? 'Iniciando Sesión...' : 'Iniciar Sesión' }
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
