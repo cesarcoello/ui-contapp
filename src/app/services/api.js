@@ -1,4 +1,6 @@
-import { API_URL } from '@/app/utils/settings'
+import { GraphQLClient, gql } from 'graphql-request'
+
+import { API_URL, GRAPHQL_URL } from '@/app/utils/settings'
 
 
 export const registerUser = async (userData) => {
@@ -40,4 +42,45 @@ export const getUserData = async (token) => {
     throw new Error('Error al obtener datos del usuario');
   }
   return response.json();
+};
+
+// Función para crear un nuevo cliente GraphQL con el token
+const createGraphQLClient = (token) => {
+  return new GraphQLClient(GRAPHQL_URL, {
+    headers: token ? {
+      Authorization: `Bearer ${token}`,
+    } : {},
+  });
+};
+
+export const getClases = async (clasename, token) => {
+  const graphQLClient = createGraphQLClient(token);
+
+  const query = gql`
+    query($clasename: String){
+      clases(nombre: $clasename){
+        id
+        nombre
+        descripcion
+        estudiantes{
+          nota
+          estudiante{
+            id
+          }
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    clasename: clasename
+  };
+
+  try {
+    const data = await graphQLClient.request(query, variables);
+    return data.clases;
+  } catch (error) {
+    console.error('Error fetching clases:', error);
+    throw new Error('Error al obtener las clases');
+  }
 };

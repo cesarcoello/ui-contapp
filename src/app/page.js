@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getUserData } from '@/app/services/api'
+import { getUserData, getClases } from '@/app/services/api'
 
 export default function Home() {
   const [user, setUser] = useState(null)
+  const [clases, setClases] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -17,12 +20,18 @@ export default function Home() {
       }
 
       try {
+
         const userData = await getUserData(token)
         setUser(userData)
+        const clasesData = await getClases("MM", token)
+        setClases(clasesData)
+
       } catch (err) {
         console.error('Error fetching user data:', err)
         localStorage.removeItem('token')
         router.push('/login')
+      }finally {
+        setLoading(false)
       }
     }
 
@@ -34,25 +43,59 @@ export default function Home() {
     router.push('/login')
   }
 
-  if (!user) {
+  if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Cargando...</div>
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>
+  }
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen text-gray-800">Cargando...</div>
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-600">{error}</div>
   }
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4 text-gray-800">Bienvenido</h1>
-        <div className="space-y-2 text-gray-800">
-          <p><strong>Nombre:</strong> {user.firstname}</p>
-          <p><strong>Apellido:</strong> {user.lastname}</p>
-          <p><strong>Email:</strong> {user.email}</p>
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h1 className="text-2xl font-bold mb-4 text-gray-800">Bienvenido, {user.firstname}</h1>
+          <div className="space-y-2 text-gray-700">
+            <p><strong>Nombre:</strong> {user.firstname} {user.lastname}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            Cerrar Sesión
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        >
-          Cerrar Sesión
-        </button>
+
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Clases</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {clases.map((clase) => (
+            <div key={clase.id} className="bg-white rounded-lg shadow-md p-6">
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">{clase.nombre}</h3>
+              <p className="text-gray-700 mb-4">{clase.descripcion}</p>
+              <p className="font-medium text-gray-700">Estudiantes: {clase.estudiantes.length}</p>
+              <div className="mt-4">
+                <h4 className="font-medium mb-2 text-gray-800">Notas:</h4>
+                <ul className="list-disc list-inside text-gray-700">
+                  {clase.estudiantes.map((estudiante) => (
+                    <li key={estudiante.estudiante.id}>
+                      Estudiante ID: {estudiante.estudiante.id} - Nota: {estudiante.nota}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
