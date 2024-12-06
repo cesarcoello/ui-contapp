@@ -1,5 +1,5 @@
 import './globals.css'
-import { VERSION } from '@/app/utils/settings'
+import { VERSION } from './utils/settings'
 
 
 export const metadata = {

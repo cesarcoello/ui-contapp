@@ -1,11 +1,11 @@
-docker buildx build --platform linux/amd64 -t sisui-dev:latest . --load
-docker run -d -p 8000:8000 --name my-next-container sisui-dev:latest
+docker buildx build --platform linux/amd64 -t ui-contapp-dev-123:latest . --load
+docker run -d -p 8000:8000 --name my-next-container ui-contapp-dev-123:latest
 
 az login
-az acr login --name siscrdev
+az acr login --name acrcontappdev123
 
-docker tag sisui-dev:latest siscrdev.azurecr.io/sisui-dev:latest
-docker tag sisui-dev:latest siscrdev.azurecr.io/sisui-dev:0.0.6
+docker tag ui-contapp-dev-123:latest acrcontappdev123.azurecr.io/ui-contapp-dev-123:latest
+docker tag ui-contapp-dev-123:latest acrcontappdev123.azurecr.io/ui-contapp-dev-123:0.0.1
 
-docker push siscrdev.azurecr.io/sisui-dev:latest
-docker push siscrdev.azurecr.io/sisui-dev:0.0.6
+docker push acrcontappdev123.azurecr.io/ui-contapp-dev-123:latest
+docker push acrcontappdev123.azurecr.io/ui-contapp-dev-123:0.0.1

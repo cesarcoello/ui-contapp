@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getUserData, getClases } from '@/app/services/api'
+import { getUserData } from './services/api'
 
 export default function Home() {
   const [user, setUser] = useState(null)
-  const [clases, setClases] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const router = useRouter()
@@ -22,15 +21,22 @@ export default function Home() {
       try {
 
         const userData = await getUserData(token)
-        setUser(userData)
-        const clasesData = await getClases("MM", token)
-        setClases(clasesData)
+        if (userData.data.detail === 'Inactive user' && userData.error) {
+          router.push('/active-user')
+
+        } else {
+          setUser(userData.data)
+
+        }
+
+
+
 
       } catch (err) {
         console.error('Error fetching user data:', err)
         localStorage.removeItem('token')
         router.push('/login')
-      }finally {
+      } finally {
         setLoading(false)
       }
     }
@@ -63,10 +69,10 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-2xl font-bold mb-4 text-gray-800">Bienvenido, {user.firstname}</h1>
+          <h1 className="text-2xl font-bold mb-4 text-gray-800">Bienvenido, {user?.firstname}</h1>
           <div className="space-y-2 text-gray-700">
-            <p><strong>Nombre:</strong> {user.firstname} {user.lastname}</p>
-            <p><strong>Email:</strong> {user.email}</p>
+            <p><strong>Nombre:</strong> {user?.firstname} {user?.lastname}</p>
+            <p><strong>Email:</strong> {user?.email}</p>
           </div>
           <button
             onClick={handleLogout}
@@ -74,27 +80,6 @@ export default function Home() {
           >
             Cerrar Sesión
           </button>
-        </div>
-
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Clases</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {clases.map((clase) => (
-            <div key={clase.id} className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">{clase.nombre}</h3>
-              <p className="text-gray-700 mb-4">{clase.descripcion}</p>
-              <p className="font-medium text-gray-700">Estudiantes: {clase.estudiantes.length}</p>
-              <div className="mt-4">
-                <h4 className="font-medium mb-2 text-gray-800">Notas:</h4>
-                <ul className="list-disc list-inside text-gray-700">
-                  {clase.estudiantes.map((estudiante) => (
-                    <li key={estudiante.estudiante.id}>
-                      Estudiante ID: {estudiante.estudiante.id} - Nota: {estudiante.nota}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
